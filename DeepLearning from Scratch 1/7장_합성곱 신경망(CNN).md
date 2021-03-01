@@ -6,7 +6,7 @@
 
 `CNN`도 지금까지와의 신경망 같이 레고 블록처럼 계층을 조립하여 만든다. 
 
-다만, `합성곱 계층(convolutional layer)`와 `풀링 계층(pooling layer)` 이 새롭게 등장한다.
+다만, `합성곱 계층(convolutional layer)`과 `풀링 계층(pooling layer)` 이 새롭게 등장한다.
 
 지금까지의 신경망은 인접하는 계층의 모든 뉴런과 결합되어 있었다.
 
@@ -36,37 +36,45 @@ CNN에서는 `패딩(padding),스트라이드(strid)` 등 고유의 용어가 �
 
 ### 7.2.1 완전연결 계층의 문제점
 
-완전연결 계층의 문제점은 `데이터의 형상이 무시`된다는 점이다.
+`완전연결 계층`의 문제점은 `데이터 형상이 무시`된다는 점이다.
 
-예를들어 이미지 데이터의 경우 세로 가로 채널로 구성된 3차원 데이터이다. 그러나 완전연결 계층에 입력할 떄는 1차원 데이터로 평탄화`flat`해줘야 한다.
+예를들어 이미지 데이터의 경우 `세로ㆍ가로ㆍ채널(색상)`로 구성된 `3차원 데이터`이다. 
 
-이미지는 3차원 형상이며, 이 형상에는 `공간적 정보`가 담겨있지만 완전연결 계층은 이 형상을 무시하기 때문에 정보를 살릴 수 없다.
+그러나 완전연결 계층에 입력할 때는 1차원 데이터로 `평탄화(flat`)해줘야 한다.
 
-반면, `합성곱 계층`은 형상을 유지한다. 이미지는 3차원 데이터로 입력받고, 3차원 데이터를 전달한다.
+평탄화로 인해 3차원 데이터에 있는 `공간적 정보` 가 완전연결 계층에서는 무시되기 때문에 공간적 정보를 살릴 수 없다.
 
-CNN 에서는 합성곱 계층의 입출력 데이터를 `특징 맵feature map` , 입력 데이터는 `입력 특징 맵` 출력 데이터는 `출력 특징 맵`이라고도 한다.
+> 공간적 정보 : 공간적으로 가까운 픽셀은 값이 비슷하거나, RGB의 각 채널은 서로 밀접하게 괸련되어 있거나, 거리가 먼 픽셀은 연관이 없거나
+
+---
+
+반면, `합성곱 계층`은 `데이터 형상을 유지`한다. 이미지는 3차원 데이터로 입력받고, 3차원 데이터를 전달한다.
+
+> CNN 에서는 합성곱 계층의 입출력 데이터를 `특징 맵(feature map)` , 입력 데이터는 `입력 특징 맵` 출력 데이터는 `출력 특징 맵`이라고도 한다.
 
 ### 7.2.2 합성곱 연산
 
-합성곱 계층에서` 합성곱 연산`을 처리한다. 이미지 처리에서는 `필터 연산`에 해당한다.
+합성곱 계층에서` 합성곱(Convolution) 연산`을 처리한다. 이미지 처리에서는 `필터 연산`에 해당한다.
 
 > 합성곱 연산 예
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-3.png">
 
-입력 데이터와 필터는 세로 가로의 형상을 가진다. 세로와 가로는 `높이 height`, `너비 width`로 표현한다.  필터는 `커널`이라고도 부른다.
+입력 데이터와 필터는 세로 가로의 형상을 가진다. 세로와 가로는 `높이 height`, `너비 width`로 표현한다.  
+
+> 필터는 `커널`이라고도 부른다.
 
 예시에서는 입력 데이터는 (4,4), 필터는 (3,3), 출력은 (2,2) 이다.
 
 ---
 
-합성곱 연산은 필터의 `윈도우`를 일정 간격으로 이동해가며 입력 데이터에 적용한다. 여기서 윈도우는 그림의 회색 3 X 3이다.
+합성곱 연산은 필터의 `윈도우`를 일정 간격으로 이동해가며 입력 데이터에 적용한다. 
 
-> 합성곱 연산의 계산 순서
+> 합성곱 연산의 계산 순서, 여기서 윈도우는 그림의 회색 3 X 3이다.
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-4.png">
 
-완전연결 신경망에는 가중치와 편향이 존재하는데 CNN에서는 `필터`가 `가중치`에 해당한다. 또한, CNN에도 편향이 존재한다.
+완전연결 신경망에는 가중치와 편향이 존재하는데 CNN에서는 `필터 = 가중치`이고, CNN에도 `편향`이 존재한다.
 
 > 합성곱 연상에서의 편향
 
@@ -80,13 +88,19 @@ CNN 에서는 합성곱 계층의 입출력 데이터를 `특징 맵feature map`
 
 예를들면 아래 그림은 (4,4) 크기의 입력 데이터에 폭 1의 패딩을 적용한 것이다.
 
-> 폭 1칸을 0으로 채웠다.
+> 상하좌우 폭 1칸을 0으로 채웠다.
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-6.png">
 
 (4,4) 크기에 패딩을 적용해서 (6,6)이 됐고, (3,3) 필터를 적용해서 (4,4) 크기의 출력 데이터를 얻었다.
 
-> 패딩은 주로 출력 데이터의 크기를 조정할 목적으로 사용한다. 만약 (4,4) 입력에 (3,3) 필터를 적용하면 (2,2) 출력이 나온다. 합성곱 연산을 여러번하는 신경망에서는 언젠가 크기가 1이 돼버리고, 합성곱 연산을 적용할 수 없게된다. 이러한 현상을 방지하기위해 패딩을 적용한다.
+패딩은 주로 ` 출력 데이터의 크기를 조정할 목적` 으로 사용한다. 
+
+> 만약 (4,4) 입력에 (3,3) 필터를 적용하면 (2,2) 출력이 나온다. 
+>
+> 합성곱 연산을 여러번하는 신경망에서는 언젠가 크기(데이터 형상)가 1이 돼버리고, 합성곱 연산을 적용할 수 없게된다. 
+>
+> 이러한 현을 방지하기위해 패딩을 적용한다.
 
 ### 7.2.4 스트라이드
 
@@ -100,7 +114,7 @@ CNN 에서는 합성곱 계층의 입출력 데이터를 `특징 맵feature map`
 
 패딩을 키우면 출력 크기가 커지고, 스트라이드를 키우면 출력 크기가 작아진다.  이것을 수식화 하면 아래처럼 된다. 
 
-입력 크기를 (H,W) 필터 크기를 (FH,FW) 출력 크기를 (OH,OW) 패딩을 P 스트라이드가 S 이다.
+> 입력 크기 (H,W) 필터 크기 (FH,FW) 출력 크기 (OH,OW) 패딩 P 스트라이드 S 
 
 <img src="7장_합성곱 신경망(CNN).assets/e 7.1.png">
 
@@ -110,19 +124,19 @@ CNN 에서는 합성곱 계층의 입출력 데이터를 `특징 맵feature map`
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-8.png">
 
-채널쪽으로 특징 맵이 여러 개라면 입력 데이터와 필터의 합성곱 연산을 채널마다 수행해서 결과를 더해서 하나의 출력을 얻는다.
+`채널`쪽으로 특징 맵이 여러 개라면 입력 데이터와 필터의 합성곱 연산을 채널마다 수행해서 결과를 더해서 하나의 출력을 얻는다.
 
-3차원의 합성곱 연산에서 주의할 점은 입력 데이터의 `채널 수`와 필터의 `채널 수`가 같아야 한다는 것이다. 위 그림에서는 3개로 일치한다.
+3차원의 합성곱 연산에서 주의할 점은 `입력 데이터의 채널 수 = 필터의 채널 수`여야 한다는 것이다. 위 그림에서는 3개로 일치한다.
 
-한편, 필터 제체의 크기는 원하는 값으로 설정할 수 있다.
+한편, 필터 자체의 크기(형상)는 원하는 값으로 설정할 수 있다.
 
 ### 7.2.6 블록으로 생각하기
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-10.png">
 
-3차원 합성곱 연산을 직육면체 블록이라고 생각하면 위의 그림과 같다. 
+위의 그림은 3차원 합성곱 연산을 직육면체 블록으로 생각한 것이다.
 
-위의 예에서는 `출력 데이터`는 한 장의 특집 맵이다. 즉, 채널이 1개인 특징 맵이다. 
+예시에서는 `출력 데이터`는 한 장의 특집 맵이다. 즉, 채널이 1개인 특징 맵이다. 
 
 만약 합성곱 연산의 출력으로 다수의 채널을 내보내려면 `필터`(가중치)를 다수 사용하면 된다.
 
@@ -134,15 +148,15 @@ FN개의 맵을 모으면 (FN, OH, OW)의 형상인 블록이 완성되고, 이 
 
 위 그림에서 보듯이 합성곱 연산에서는 `필터의 수`도 고려해야 한다.
 
-그래서 필터의 가중치 데이터는 `4차원`데이터 이며 (출려 채널 수, 입력 채널 수, 높이, 너비) 순으로 쓴다. 
+그래서 필터의 가중치 데이터는 `4차원`데이터 이며 (출력 채널 수, 입력 채널 수, 높이, 너비) 순으로 쓴다. 
 
 > 합성곱 연산에서의 편향
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-12.png">
 
-그림 처럼 `편향`은 채널 하나에 값 하나씩으로 구성된다. 위 그림에서 편향의 형상은 `(FN, 1, 1)`이고, 필터의 출력 형상은 항상 `(FN, OH, OW)` 이다.
+`편향`은 채널 하나에 한 개의 값으로 이루어져있다. 위 그림에서 편향의 형상은 `(FN, 1, 1)`이고, 필터의 출력 형상은 항상 `(FN, OH, OW)` 이다.
 
-이 두 블록`편향과 필터의 출력`을 더하면 편향의 각 값이 필터의 출력 블록의 각 채널 원소에 더해진다.
+`편향과 필터의 출력 블록`을 더하면` 편향의 각 값`이 `필터 출력 블록의 각 채널 원소`에 더해져서 출력 데이터를 완성한다.
 
 ### 7.2.7 배치 처리
 
@@ -154,11 +168,15 @@ FN개의 맵을 모으면 (FN, OH, OW)의 형상인 블록이 완성되고, 이 
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-13.png">
 
-위 그림 처럼 데이터는 4차원의 형상으로 각 계층을 타고 흐른다. 여기서 주의할 것은 신경망에 4차원 데이터가 하나 흐를 때마다 데이터 `N`개에 대한 합성곱 연산이 이루어 진다는 것이다. 즉, N회 분의 처리를 한 번에 수행한다는 뜻이다.
+데이터는 `4차원의 형상`으로 각 계층을 타고 흐른다. 
+
+여기서 주의할 것은 신경망에 4차원 데이터가 하나 흐를 때마다 데이터 `N`개에 대한 합성곱 연산이 이루어 진다는 것이다. 
+
+즉, N회 분의 처리를 한 번에 수행한다는 뜻이다.
 
 ## 7.3 풀링 계층
 
-`풀링`은 세로 가로 방햐으이 공간을 줄이는 연산이다.
+`풀링`은 세로 가로 방향의 공간을 줄이는 연산이다.
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-14.png">
 
@@ -172,21 +190,21 @@ FN개의 맵을 모으면 (FN, OH, OW)의 형상인 블록이 완성되고, 이 
 
 스트라이드는 영역의 크기에 맞게 설정해야한다. 즉, 2X2 영역이라면 스트라이드는 2, 3X3 영역이라면 스트라이드는 3이 설정해야 한다.  
 
-> 풀링은 평균 풀링도 존재한다. 다만, 일반적으로 최대 풀링을 사용한다.
+> 풀링은 평균 풀링도 존재한다. 다만, 일반적으로 최대 풀링을 많이 사용한다.
 
 ### 7.3.1 풀링 계층의 특징
 
-> 학습해야 할 매개변수가 없다.
+__학습해야 할 매개변수가 없다.__
 
 풀링은 영역에서 최댓값 혹은 평균을 취하는 처리이므로 학습할 필요가 없다.
 
-> 채널 수가 변하지 않는다.
+__채널 수가 변하지 않는다__.
 
 풀링 연산은 입력 데이터의 채널 수 그대로 출력데이터로 내보낸다.
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-15.png">
 
-> 입력의 변화에 영향을 적게 받는다.
+__입력의 변화에 영향을 적게 받는다.__
 
 입력 데이터가 조금 변해도 풀링의 결과는 잘 변하지 않는다. 
 
@@ -226,17 +244,11 @@ for 대신 `im2col`이라는 편의 함수를 사용하는 방법을 구현호�
 
 <img src="7장_합성곱 신경망(CNN).assets/fig 7-18.png">
 
-위 그림처럼 입력 데이터에서 필터를 적용하는 영역(3차원 블록)을 한 줄로 늘어 놓는다.
+입력 데이터에서 `필터를 적용할 영역`(3차원 블록)을 한 줄로 늘어 놓는다.
 
-> (N, C, W, H) -> (N, C * W * H) ?
+그림에서는 스트라이드를 크게 잡아 필터의 적용 영역이 겹치지 않게 했지만, 실제 상황에서는 영역이 겹치는 경우가 대부분이다.
 
-그림에서는 스트라이드를 크게 잡아 필터의 적용 영역이 겹치지 않게 했지만,
-
-실제 상황에서는 영역이 겹치는 경우가 대부분이다.
-
-필터 적용 영역이 `겹치게 되면` im2col로 전개한 후의 원소 수가 원래 블록 원소 수보다 많아진다. 
-
-그래서 im2col은 `메모리를 더 많이 소비`한다는 단점이 있다.
+필터 적용 영역이 `겹치게 되면` im2col로 전개한 후의 원소 수가 원래 블록 원소 수보다 많아진다.  그래서 im2col은 `메모리를 더 많이 소비`한다는 단점이 있다.
 
 하지만 행렬로 묶음으로써 선형 대수 라이브러를 활용해` 효율을 높일 수` 있다.
 
@@ -254,7 +266,8 @@ for 대신 `im2col`이라는 편의 함수를 사용하는 방법을 구현호�
 
 ```python
 def im2col(input_data, filter_h, filter_w, stride=1, pad=0):
-    """다수의 이미지를 입력받아 2차원 배열로 변환한다(평탄화).
+    """
+    다수의 이미지를 입력받아 2차원 배열로 변환한다(평탄화).
     Parameters
     ----------
     input_data : 4차원 배열 형태의 입력 데이터(이미지 수, 채널 수, 높이, 너비)
@@ -262,7 +275,6 @@ def im2col(input_data, filter_h, filter_w, stride=1, pad=0):
     filter_w : 필터의 너비
     stride : 스트라이드
     pad : 패딩 값
-    Returns
     -------
     col : 2차원 배열
     """
@@ -277,8 +289,9 @@ def im2col(input_data, filter_h, filter_w, stride=1, pad=0):
     # 입력 데이터 패딩
     # [(0,0), (0,0), (pad, pad), (pad, pad)] -> 4차원 패딩
     # 순서데로 데이터 개수, 채널, 상하, 좌우(?) 패딩할 개수
-    # mode : 값을 채우는 방식? ,default = 0
+    # mode : 값을 채우는 방식?constant : 상수로 채움, (default = 0)
     img = np.pad(input_data, [(0,0), (0,0), (pad, pad), (pad, pad)], 'constant')
+    
     # im2col 출력 결과물 저장 배열
     col = np.zeros((N, C, filter_h, filter_w, out_h, out_w))
 	
@@ -461,6 +474,237 @@ __초기화 때 받는 인수__
   - weight_init_std : 초기화 때의 가중치 표준편차
 
 ```python
+import sys
+import os
 
+sys.path.append(os.pardir)
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import OrderedDict
+from common.layers import *
+from dataset.mnist import load_mnist
+from common.trainer import Trainer
+
+
+class SimpleConvNet:
+    """
+    CNN 네트워크 구성
+    입력 데이터 -> [Conv -> ReLU -> Pooling] -> [Affine -> ReLU] -> [Affine -> Softmax] -> 출력
+    """
+
+    def __init__(
+        self,
+        input_dim=(1, 28, 28),
+        conv_param={"filter_num": 30, "filter_size": 5, "pad": 0, "stride": 1},
+        hidden_size=100,
+        output_size=10,
+        weight_init_std=0.01,
+    ):
+        # 합성곱 계층의 하이퍼파라미터를 딕셔너리에서 꺼내서 저장
+        filter_num = conv_param["filter_num"]
+        filter_size = conv_param["filter_size"]
+        filter_pad = conv_param["pad"]
+        filter_stride = conv_param["stride"]
+        input_size = input_dim[1]
+        
+        # 합성곱 계층의 출력 크기 계산
+        conv_output_size = (
+            input_size - filter_size + 2 * filter_pad
+        ) / filter_stride + 1
+        
+        # 풀링 계층 출력 크기 계산
+        pool_output_size = int(
+            filter_num * (conv_output_size / 2) * (conv_output_size / 2)
+        )
+
+        # 가중치 초기화
+        self.params = {}
+        # 1번째 층의 합성곱 계층 가중치와 편향
+        # 배치 데이터 개수, 채널 수, 높이 너비
+        self.params["W1"] = weight_init_std * np.random.randn(
+            filter_num, input_dim[0], filter_size, filter_size
+        )
+        self.params["b1"] = np.zeros(filter_num)
+
+        # 2번째 층의 완전연결 계층 가중치와 편향
+        self.params["W2"] = weight_init_std * np.random.randn(
+            pool_output_size, hidden_size
+        )
+        self.params["b2"] = np.zeros(hidden_size)
+
+        # 3번째 층의 완전연결 계층 가중치와 편향
+        self.params["W3"] = weight_init_std * np.random.randn(
+            hidden_size, output_size
+        )
+        self.params["b3"] = np.zeros(output_size)
+
+        # CNN을 구성하는 계층을 생성
+        self.layers = OrderedDict()
+        # 1번째 층의 합성곱 계층
+        self.layers["Conv1"] = Convolution(
+            self.params["W1"],
+            self.params["b1"],
+            conv_param["stride"],
+            conv_param["pad"],
+        )
+        # 1번째 층의 활성화 함수 ReLU
+        self.layers["Relu1"] = Relu()
+        # 풀링 계층
+        self.layers["Pool1"] = Pooling(pool_h=2, pool_w=2, stride=2)
+        # 2번째 층의 완전연결 계층
+        self.layers["Affine1"] = Affine(self.params["W2"], self.params["b2"])
+        # 2번째 층의 활성화 함수 ReLU
+        self.layers["Relu2"] = Relu()
+
+        # 3번째 층의 완전연결 계층
+        self.layers["Affine2"] = Affine(self.params["W3"], self.params["b3"])
+        # 출력 계층 소프트맥스 함수
+        self.last_layer = SoftmaxWithLoss()
+
+    def predict(self, x):
+        # 추론 수행
+        # 미리 초기화해놓은 계층을 앞에서부터 순전파 메서드 호출
+        # 결과를 다음 계층으로 전달
+        for layer in self.layers.values():
+            x = layer.forward(x)
+        return x
+
+    def loss(self, x, t):
+        # 손실함수 값 계산
+        # 추론한 결과를 인수로 마지막층(출력계층 및 손실함수 계산)의 순전파 메서 호출
+        # 처음부터 마지막 계층까지 순전파 처리
+        y = self.predict(x)
+        return self.last_layer.forward(y, t)
+
+    def accuracy(self, x, t, batch_size=100):
+        if t.ndim != 1:
+            t = np.argmax(t, axis=1)
+
+        acc = 0.0
+
+        for i in range(int(x.shape[0] / batch_size)):
+            tx = x[i * batch_size : (i + 1) * batch_size]
+            tt = t[i * batch_size : (i + 1) * batch_size]
+            y = self.predict(tx)
+            y = np.argmax(y, axis=1)
+            acc += np.sum(y == tt)
+
+        return acc / x.shape[0]
+
+    def gradient(self, x, t):
+        # 오차역전파법으로 기울기 계산
+        # 순전파
+        self.loss(x, t)
+
+        # 역전파
+        dout = 1
+        dout = self.last_layer.backward(dout)
+
+        layers = list(self.layers.values())
+        layers.reverse()
+        for layer in layers:
+            dout = layer.backward(dout)
+
+        # 결과 저장
+        grads = {}
+        grads["W1"] = self.layers["Conv1"].dW
+        grads["b1"] = self.layers["Conv1"].db
+        grads["W2"] = self.layers["Affine1"].dW
+        grads["b2"] = self.layers["Affine1"].db
+        grads["W3"] = self.layers["Affine2"].dW
+        grads["b3"] = self.layers["Affine2"].db
+
+        return grads
+
+
+# 데이터 읽기
+(x_train, t_train), (x_test, t_test) = load_mnist(flatten=False)
+
+# 시간이 오래 걸릴 경우 데이터를 줄인다.
+x_train, t_train = x_train[:5000], t_train[:5000]
+x_test, t_test = x_test[:1000], t_test[:1000]
+
+# 최대 에포크 수
+max_epochs = 20
+
+# CNN 네트워크 클래스 생성
+# 하이퍼파라미터 설정
+network = SimpleConvNet(
+    # 입력데이터 형상
+    input_dim=(1, 28, 28),
+    # 필터 개수, 사이즈, 패딩, 스트라이드
+    conv_param={"filter_num": 30, "filter_size": 5, "pad": 0, "stride": 1},
+    # 은닉층 개수
+    hidden_size=100,
+    # 출력층 개수
+    output_size=10,
+    weight_init_std=0.01,
+)
+
+# 학습 클래스 생성
+# 네트워크 - cnn
+# 최적화 방법 - Adam
+# 하이퍼파라미터 - 학습율 : 0.001
+# 평가 간격 - 1000epoch마다
+trainer = Trainer(
+    network,
+    x_train,
+    t_train,
+    x_test,
+    t_test,
+    epochs=max_epochs,
+    mini_batch_size=100,
+    optimizer="Adam",
+    optimizer_param={"lr": 0.001},
+    evaluate_sample_num_per_epoch=1000,
+)
+# 학습시작
+trainer.train()
+
+# 그래프 그리기
+markers = {"train": "o", "test": "s"}
+# 최대 에포크 크기의 배열 생성
+x = np.arange(max_epochs)
+plt.plot(x, trainer.train_acc_list, marker="o", label="train", markevery=2)
+plt.plot(x, trainer.test_acc_list, marker="s", label="test", markevery=2)
+plt.xlabel("epochs")
+plt.ylabel("accuracy")
+plt.ylim(0, 1.0)
+plt.legend(loc="lower right")
+plt.show()
 ```
+
+## 7.6 CNN 시각화하기
+
+필터를 이미지로 나타내는 코드 [링크](https://github.com/youbeebee/deeplearning_from_scratch/blob/master/ch7.CNN/visualize_filter.py)
+
+> 학습 전과 후의 1번째 층의 합성곱 계층 가중치
+
+<img src="7장_합성곱 신경망(CNN).assets/fig 7-24.png">
+
+학습 전 필터는 무작위로 초기화 했기 때문에 규칙이 없다.
+
+학습 후 필터는 규칙성을 가진 이미지가 됐다.
+
+학습 후의 필터는 에지(색상이 바뀌는 경계선)와 블롭(국소적으로 덩어리진 영역)등을 보고 있다.
+
+예를들어 왼쪽 절반이 흰색이고, 오른쪽 절반이 검은색인 필터는 세로 방향의 에지에 반응하는 필터이다.
+
+> 왼쪽 절반이 흰색이고, 오른쪽 절반이 검은색인 필터와 아래쪽 절반이 흰색이고 위쪽 절반이 검은색인 필터
+
+<img src="7장_합성곱 신경망(CNN).assets/fig 7-25.png">
+
+### 7.6.2 층 깊이에 따른 추출 정보 변화
+
+딥러닝 시각화에 관한 연구에 따르면, 계층이 깊어질수록 추출되는 정보는 더 추상화된다는 것을 알 수 있다.
+
+> 일반 사물 인식을 수행한 8츨의 CNN(AlexNet)
+
+<img src="7장_합성곱 신경망(CNN).assets/fig 7-26.png">
+
+위 그림의 네트워크는 합성곱 계층과 풀링 계층을 여러 겹 쌓고 마지막으로 완전연결 계층을 거쳐 결과를 출력하는 구조이다.
+
+위 그림처럼 합성곱 계층을 여러 겹 쌓아서 층이 깊어 짚어지면서 더 복잡하고 추상화된 정보가 추출된다.
+
+`단순한 에지 -> 텍스처 -> 사물의 일부 `에 반응하도록 변화하고 있다.
 
