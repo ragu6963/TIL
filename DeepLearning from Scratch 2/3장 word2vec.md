@@ -1,16 +1,16 @@
 
 
-# 3장 word2vec
+# 3장 word2vec [github](https://github.com/WegraLee/deep-learning-from-scratch-2)
 
 ## 3.1 추론 기반 기법과 신경망
 
 ### 3.1.1 통계 기반 기법의 문제점
 
-현업에서 다루는 말뭉치의 어휘 수는 100만을 훌쩍 넘는다고 한다.
+현업에서 다루는 말뭉치의 어휘 수는 100만7을 훌쩍 넘는다고 한다.
 
 어휘가 100만 개라면, `통계 기반 기법`에서는 `100만 X 100만` 이라는 거대한 행렬이 만들어 진다.
 
-이는 현실적으로 `❗불가능`하다.
+이는 현실적으로 `불가능`하다.
 
 💡 반면에 `추론 기반 기법`은 신경망을 이용해서 미니배치로 학습하는 것이 일반적이기 때문에 말뭉치가 거대하더라도 학습시킬 수 있다.
 
@@ -121,11 +121,11 @@ print(h)
 
 ## 3.2 단순한 word2vec
 
-word2vec에서 제안하는 `CBOW` 모델을 사용해 신경망을 구축해보자
+word2vec에서 제안하는 `CBOW` 모델을 사용해 신경망을 구축해보자.
 
 ### 3.2.1 CBOW 모델의 추론 처리
 
-💡 CBOW 모델은 맥락으로부터 타깃을 추측하는 신경망이다.(타깃은 중앙 단어이고, 주변 단어가 맥락이다.)
+💡 CBOW`continuous bag of words` 모델은 맥락`주변단어`으로부터 타깃`중앙 단어`을 추측하는 신경망이다.
 
 CBOW 모델의 입력은 "you"와 "goodbye" 같은 맥락이다.
 
@@ -133,7 +133,7 @@ CBOW 모델의 입력은 "you"와 "goodbye" 같은 맥락이다.
 
 CBOW 모델의 입력층은 2개가 있고, 은닉층을 거쳐 출력층에 도달한다.
 
-입력층에서 은닉층으로의 변환과 은닉층에서 출력층 뉴런으로의 변환은 완전연결계층이 처리한다.
+💡입력층에서 은닉층으로의 변환과 은닉층에서 출력층 뉴런으로의 변환은 `완전연결계층`이 처리한다.
 
 > 위 그림에서 입력층이 2개인 이유는 맥락으로 사용할 단어를 2개로 정했기 때문이다. 만약 N개를 사용하면 입력층이 N개가 된다.
 
@@ -143,7 +143,7 @@ CBOW 모델의 입력층은 2개가 있고, 은닉층을 거쳐 출력층에 도
 
 만약 입력층이 여러 개이면 전체를 평균을 한다.
 
-예를들어 입력층 두 개가 변화한 값 `h1, h2`가 있다면 은닉층 뉴런은 `(h1 + h2) / 2 `가 된다.
+> 예를들어 입력층 두 개가 변화한 값 `h1, h2`가 있다면 은닉층 뉴런은 `(h1 + h2) / 2 `가 된다.
 
 ---
 
@@ -211,7 +211,7 @@ print(s)
 
 💡CBOW 모델을 통해 얻은 점수에 소프트 맥스 함수를 적용하면 `확률`을 얻을 수 있다.
 
-이 `확률`은 맥락(전후 단어)가 주어졌을 때 중아에 어떤 단어가 출현할지에 대한 확률이다.
+이 `확률`은 맥락(전후 단어)가 주어졌을 때 중앙에 어떤 단어가 출현할지에 대한 확률이다.
 
 <img src="assets/fig 3-12.png">
 
@@ -243,9 +243,9 @@ word2vec에는 두 가지 가중치가 있다.
 
 `입력 층 완전연결계층`의 가중치와 `출력 층 완전연결계층`의 가중치 이다.
 
-여기서 입력 측 가중치의 각 행이 각 단어의 분사 표현에 해당한다.
+- 입력 측 가중치의 각 행이 각 단어의 분사 표현에 해당한다.
 
-출력 측 가중치에는 단어의 의미가 인코딩된 벡터가 저장 되어있다. 다만, 각 닫어의 분산 표현이 열 방향으로 저장 된다.
+- 출력 측 가중치에는 단어의 의미가 인코딩된 벡터가 저장 되어있다. 다만, 각 닫어의 분산 표현이 열 방향으로 저장 된다.
 
 ---
 
@@ -263,11 +263,11 @@ word2vec은 두 가지 가중치 중 `입력 측의 가중치`만 이용하는�
 
 ### 3.3.1 맥락과 타깃
 
-word2vec 신경망의 입력은 `맥락`이고, 정답 레이블은 맥락에 둘러싸인 중앙 단어`타깃`이다.
+💡word2vec 신경망의 입력은 `맥락`이고, 정답 레이블은 맥락에 둘러싸인 중앙 단어`타깃`이다.
 
 <img src="assets/fig 3-16.png">
 
-
+> 단어 ID  목록 생성
 
 ```python
 import numpy as np
@@ -294,12 +294,13 @@ def preprocess(text):
 text = "You say goodbye and I say hello."
 corpus, word_to_id, id_to_word = preprocess(text)
 print(corpus)  # [0 1 2 3 4 1 5 6]
-print(id_to_word) # {0: 'you', 1: 'say', 2: 'goodbye', 3: 'and', 4: 'i', 5: 'hello', 6: '.'}
+print(id_to_word) 
+# {0: 'you', 1: 'say', 2: 'goodbye', 3: 'and', 4: 'i', 5: 'hello', 6: '.'}
 ```
 
 <img src="assets/fig 3-17.png">
 
-위 그림처럼 corpus를 주면 맥락과 타깃을 반환하는 함수가 필요하다.
+> 단어 ID 목록 -> 맥락과 타깃을 반환하는 함수
 
 ```python
 def create_contexts_target(corpus, window_size=1):
@@ -309,23 +310,27 @@ def create_contexts_target(corpus, window_size=1):
     :param window_size: 윈도우 크기(윈도우 크기가 1이면 타깃 단어 좌우 한 단어씩이 맥락에 포함)
     :return:
     """
+    # 좌우 윈도우 사이즈만큼 뺀 데이터
+    # 예) window_size = 1, corpus[1:-1] -> 두 번째부터 뒤에서 두 번째까지 데이터
     target = corpus[window_size:-window_size]
 
-    # 맥락 저장 리스트
+    # 전체 맥락 저장 리스트
     contexts = []
 
     # 좌 우 윈도우크기 만큼 뺀만큼 인덱스 순회
     for idx in range(window_size, len(corpus) - window_size):
+        # 타깃 단어에 대한 맥락 리스트
         cs = []
         # 좌 우 윈도우 크기만큼 탐색
         for t in range(-window_size, window_size + 1):
             # t == 0 -> 타깃 단어
             if t == 0:
                 continue
-            # 타깃(cs)에 맥락 추가
+                
+            # 타깃단어에 대한 맥락 리스트에 데이터 추가
             cs.append(corpus[idx + t])
 
-        # 맥락 리스트에 추가
+        # 전체 맥락 리스트에 데이터 추가
         contexts.append(cs)
 
     return np.array(contexts), np.array(target)
@@ -370,6 +375,7 @@ def convert_one_hot(corpus, vocab_size):
     elif corpus.ndim == 2:
         C = corpus.shape[1]
         # 0으로 채운 3차원 행렬 생성
+        # N : 말뭉치 수 , C : 2 * 윈도우 사이즈 , vocab_sizxe : 어휘 수
         one_hot = np.zeros((N, C, vocab_size), dtype=np.int32)
 
         # 맥락의 id 인덱스를 1로 변환
@@ -448,6 +454,9 @@ class SimpleCBOW:
 
     # 순전파
     def forward(self, contexts, target):
+        # 원핫인코딩된 데이터 입력
+        # h0 : 첫번째 입력
+        # h1 : 두번째 입력
         h0 = self.in_layer0.forward(contexts[:, 0])
         h1 = self.in_layer1.forward(contexts[:, 1])
         # 평균 계산
@@ -591,3 +600,7 @@ skip-gram 모델은 정확도가 더 좋지만 CBOW 모델은 학습 속도가 �
 - 통계 기반 기법은 1회 학습, 추론 기반 기법은 여러번 학습
 - 말뭉치에 새 단어를 추가할 때 통계 기반 기법은 처음부터 다시 학습, 추론 기반 기법은 매개변수만 다시 학습.
 - 통계 기반 기법에서는 단어의 유사성이 인코딩되고, word2vec에서는 유사성은 물론, 복잡한 단어 사이의 패턴도 파악되어 인코딩 된다.
+
+추론 기반 기법과 통계 기반 기법을 융합한 `GloVe`기법도 있다.
+
+`Glove`는 말뭉치 전체의 통계정보를 손실 함수에 도입해 미니배치 학습을 한다.
