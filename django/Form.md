@@ -6,6 +6,8 @@
 2. HTML `form tag` 생성
 3. 요청으로 받은 `데이터 처리`
 
+> 요청받은 데이터를 특정 `model`의 레코드로 저장하기 위해서는`.cleaned_data[]` 로 데이터를 추출해서 처리해야한다.
+
 ### 1. Form 생성
 
 ```python
@@ -104,7 +106,7 @@ def create(request):
     return render(request, "articles:new", context)
 ```
 
-
+ 
 
 
 

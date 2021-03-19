@@ -1,6 +1,8 @@
 # Model Form [공식문서](https://docs.djangoproject.com/en/3.1/topics/forms/modelforms/)
 
-
+> `Form`과 유사한 기능을 한다. 다만, `Model Form`은 `model`에서 필요한 양식을 정의해준다.
+>
+> 그리고, `.save()` 로 요청받은 데이터를 바로 `model`의 레코드로 저장할 수 있다.
 
 ### 1. Model Form 생성
 
@@ -141,32 +143,4 @@ def edit(request, pk):
 
 ---
 
-### 속성`attrs` 추가
-
-```python
-# app/forms.py  
-from django import forms
-from .models import Article
-
-
-class ArticleForm(forms.ModelForm):
-    title = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-				'class': 'my-title abc',
-                'placeholder': '10자 이내로 작성해주세요.'
-            }
-        )
-    )
-    # 세부정보
-    class Meta:
-        # 참고할 Model
-        model = Article
-        # 입력받을 field 설정
-        fields = ("title", "content")
-        
-        # 전체 field 설정
-        # fields = "__all__"
-
-```
-
+ 
