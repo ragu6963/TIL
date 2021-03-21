@@ -151,9 +151,9 @@ class Embedding:
 >
 > y : 시그모이드 함수 출력, t : 정답 레이블(1 또는 0)
 
-![e 4-3](assets/4장 word2vec 속도 개선/e 4-3.png)
+![e 4-3]("assets/4장 word2vec 속도 개선/e 4-3.png")
 
-![fig 4-10](assets\4장 word2vec 속도 개선\fig 4-10.png)
+![fig 4-10]("assets\4장 word2vec 속도 개선\fig 4-10.png")
 
 위 그림에서 주목할 것은 `역전파의 y-t`이다.
 
