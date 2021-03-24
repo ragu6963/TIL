@@ -6,7 +6,6 @@
 
 ```python
 class CommentForm(forms.Form): 
-    ###
     comment = forms.CharField(widget=forms.Textarea)
 ```
 
@@ -16,6 +15,7 @@ class CommentForm(forms.Form):
 
 ```python
 # input type 및 속성, 클래스 정의
+
 from django import forms
 class CommentForm(forms.Form):
     name = forms.CharField(
@@ -34,7 +34,5 @@ from django import forms
 class CommentForm(forms.Form):
     name = forms.CharField()
     name.widget.attrs.update({'class': 'test test2'})
-    
-
 ```
 
