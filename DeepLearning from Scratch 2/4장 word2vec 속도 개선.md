@@ -453,24 +453,39 @@ class CBOW:
         for i in range(2 * window_size):
             layer = Embedding(W_in)  # Embedding 계층 사용
             self.in_layers.append(layer) # 계층 모으기
-            
+        # print(self.in_layers, len(self.in_layers))
+        """
+        [<common.layers.Embedding object at 0x000002704C44E0D0>, 
+        <common.layers.Embedding object at 0x0000027058964BE0>, ...,],
+        10
+        """
+        
        	# 네거티브 샘플링 계층 사용
         self.ns_loss = NegativeSamplingLoss(W_out, corpus, power=0.75, sample_size=5)
+        # print(self.ns_loss)
+        """
+        <ch04.negative_sampling_layer.NegativeSamplingLoss object at 0x0000024D71F33BB0>
+        """
 
         # 모든 가중치와 기울기를 배열에 모은다.
         layers = self.in_layers + [self.ns_loss]
         self.params, self.grads = [], []
         for layer in layers:
+            # 가중치
             self.params += layer.params
+            # 기울기
             self.grads += layer.grads
 
         # 인스턴스 변수에 단어의 분산 표현을 저장한다.
         self.word_vecs = W_in
 	
+    # 맥락, 타깃 단어
     def forward(self, contexts, target):
         h = 0
         for i, layer in enumerate(self.in_layers):
             h += layer.forward(contexts[:, i])
+        
+        # 결과의 평균 계산
         h *= 1 / len(self.in_layers)
         loss = self.ns_loss.forward(h, target)
         return loss
@@ -481,5 +496,96 @@ class CBOW:
         for layer in self.in_layers:
             layer.backward(dout)
         return None
+```
+
+### 4.3.2 CBOW 모델 학습코드
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch04/train.py
+import sys
+sys.path.append('..')
+import numpy as np
+from common import config 
+import pickle
+from common.trainer import Trainer
+from common.optimizer import Adam
+from cbow import CBOW
+from skip_gram import SkipGram
+from common.util import create_contexts_target, to_cpu, to_gpu
+from dataset import ptb
+
+
+# 하이퍼파라미터 설정
+window_size = 5
+hidden_size = 100
+batch_size = 100
+max_epoch = 10
+
+# 데이터 읽기 & 전처리(단어 ID 목록 만들기)
+corpus, word_to_id, id_to_word = ptb.load_data('train')
+# 어휘 개수
+vocab_size = len(word_to_id)
+
+contexts, target = create_contexts_target(corpus, window_size)
+if config.GPU:
+    contexts, target = to_gpu(contexts), to_gpu(target)
+
+# 모델 생성
+model = CBOW(vocab_size, hidden_size, window_size, corpus)
+# model = SkipGram(vocab_size, hidden_size, window_size, corpus)
+# 최적화 함수
+optimizer = Adam()
+# Trainer 인스턴스
+trainer = Trainer(model, optimizer)
+
+# 학습 시작
+trainer.fit(contexts, target, max_epoch, batch_size)
+trainer.plot()
+
+# 나중에 사용할 수 있도록 필요한 데이터 저장
+word_vecs = model.word_vecs
+if config.GPU:
+    word_vecs = to_cpu(word_vecs)
+params = {}
+params['word_vecs'] = word_vecs.astype(np.float16)
+params['word_to_id'] = word_to_id
+params['id_to_word'] = id_to_word
+pkl_file = 'cbow_params.pkl'  # or 'skipgram_params.pkl'
+with open(pkl_file, 'wb') as f:
+    pickle.dump(params, f, -1)
+```
+
+### 4.3.3 CBOW 모델 평가
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch04/eval.py
+import sys
+sys.path.append('..')
+from common.util import most_similar, analogy
+import pickle
+
+# 가중치 파일
+pkl_file = 'cbow_params.pkl'
+# pkl_file = 'skipgram_params.pkl'
+
+# 가중치 불러오기
+with open(pkl_file, 'rb') as f:
+    params = pickle.load(f)
+    word_vecs = params['word_vecs']
+    word_to_id = params['word_to_id']
+    id_to_word = params['id_to_word']
+
+# 가장 비슷한(most similar) 단어 뽑기
+querys = ['you', 'year', 'car', 'toyota']
+for query in querys:
+    most_similar(query, word_to_id, id_to_word, word_vecs, top=5)
+
+# 유추(analogy) 작업
+print('-'*50)
+analogy('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs)
+analogy('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
+analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
+analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)
+
 ```
 
