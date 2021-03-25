@@ -323,3 +323,61 @@ def delete(request):
     return redirect("accounts:index")
 ```
 
+## 9. 비밀번호 변경
+```python
+# accounts/urls.py
+
+from django.urls import path
+from . import views
+
+app_name = "accounts"
+urlpatterns = [
+    # ...
+    path("password/", views.update_password, name="update_password"),
+
+]
+``` 
+
+```python
+# accounts/views.py
+
+from django.shortcuts import redirect, render
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
+from .forms import CustomUserChangeForm
+from django.contrib.auth.forms import PasswordChangeForm
+
+
+def update_password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect("accounts:index")
+
+    else:
+        form = PasswordChangeForm(request.user)
+
+    context = {
+        "form": form,
+    }
+    return render(request, "accounts/update_password.html", context)
+
+```
+
+```django
+{# accounts/templates/accounts/update_password.html #}
+
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button>패스워드변경</button>
+</form>
+{% endblock content %}
+```
