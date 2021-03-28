@@ -11,16 +11,19 @@
 
 <img src="assets/4장 word2vec 속도 개선/fig 4-2.png">
 
-위 그림에서는 입력층과 출력층에 각 100만 개의 뉴런이 존재한다. 많은 뉴런 때문에 중간 계산에 `많은 시간`이 소요된다.
+위 그림에서는 입력층과 출력층에 각 100만 개의 뉴런이 존재한다. 
+
+✅ 많은 뉴런 때문에 중간 계산에 `많은 시간`이 소요된다.
 
 정확히는 다음의 두 계산이 병목이 된다.
 
-1. 입력층의 원핫 표현과 가중치 행렬 $W~in$  의 곱 계산
-2. 은닉층과 가중치 행렬 $W~out$의 곱 및 Softmax 계층의 계산
+1. 입력층의 원핫 표현과 가중치 행렬 W~in~  의 곱 계산
+2. 은닉층과 가중치 행렬 W~out​~의 곱 및 Softmax 계층의 계산
 
 첫 번째는 입력층의 원핫 표현의 문제이다. 
 
-어휘가 100만 개라면 한 어휘의 원핫 표현의 원소 수가 100만 개의 벡터가 된다. 상당한 메모리를 차지하고, 이 원핫 벡터와 $W~in$을 곱하면 `계산 자원을 상당히 소모`한다.
+어휘가 100만 개라면 한 어휘의 원핫 표현의 원소 수가 100만 개의 벡터가 된다. 
+상당한 메모리를 차지하고, 이 원핫 벡터와 $W~in$을 곱하면 `계산 자원을 상당히 소모`한다.
 
 두 번째는 은닉층 이후의 계산이다.
 
@@ -29,16 +32,15 @@
 ### 4.1.1 Embedding 계층
 
 앞 장의 word2vec 에서는 `단어의 원핫 표현`과 `가중치 행렬`과 곱했다.
-
 만약 어휘 수가 100만개 은닉층 뉴런이 100개라면 아래 그림과 같은 행렬곱이 발생한다.
 
 <img src="assets/4장 word2vec 속도 개선/fig 4-3.png">
 
-그런데 `행렬곱`이 하는 일은 단지 `가중치 행렬`에서 `특정 행`을 추출할 뿐이다. 그러므로 `행렬곱`은 사실 필요가 없다.
+✅그런데 `행렬곱`이 하는 일은 단지 `가중치 행렬`에서 `특정 행`을 추출할 뿐이기에 `행렬곱`은 사실 필요가 없다.
 
 이처럼 `단어 ID에 해당하는 특정 행 추출`을 하는 계층을 `Embedding 계층`이라고 부른다.
 
-### 4.1.2 Embedding 계층 구현 
+### 4.1.2 Embedding 계층 구현
 
 ```python
 class Embedding:
@@ -97,15 +99,15 @@ class Embedding:
 1. 은닉층의 뉴런과 가중치 행렬($W~out~$) 의 곱
 2. Softmax 계층의 계산
 
-첫 번째는 거대한 행렬을 곱하는 문제이다. 위 그림에서는 은닉층의 뉴런 벡터 크기는`100`이고, 가중치 행렬의 크기는 `100 X 100만`이다. 이 두 행렬을 곱하기 위해서는 많은 시간이 소모된다.
+✅ 첫 번째는 거대한 행렬을 곱하는 문제이다. 
+위 그림에서는 은닉층의 뉴런 벡터 크기는`100`이고, 가중치 행렬의 크기는 `100 X 100만`이다. 
+이 두 행렬을 곱하기 위해서는 많은 시간이 소모된다.
 
-두 번째는 Softmax 계층은 어휘가 많아질수록 계산량이 많아진다는 점이다.
+✅ 두 번째는 Softmax 계층은 어휘가 많아질수록 계산량이 많아진다는 점이다.
 
 <img src="assets/4장 word2vec 속도 개선/e 4-1.png">
 
-위 식은 k번째 단어를 타깃으로 했을 때의 Softmax 계산이다.
-
-분모 값을 얻으려면 exp 계산을 `100만`번 수행해야한다.
+위 식은 k번째 단어를 타깃으로 했을 때의 Softmax 계산인데 분모 값을 얻으려면 exp 계산을 `100만`번 수행해야한다.
 
 ### 4.2.2 다중 분류에서 이진 분류로
 
@@ -121,9 +123,9 @@ class Embedding:
 
 `이진 분류`로 접근하면 신경망 계층을 위 그림처럼 나타낼 수 있다.
 
-은닉층과 출력 층의 $W~out~$의 내적은
+은닉층과 출력층 $W~out~$의 내적은
 
-✅ `하나의 특정 단어 벡터`만 추출하고,  그 벡터와 은닉층 뉴런의 내적을 계산하면 된다.
+✅ `(임베디딩 계층을 거친)하나의 특정 단어 벡터`만 추출해서 그 벡터와 은닉층 뉴런의 내적을 계산하면 된다.
 
 > 그림에서의 특정 단어는  `say`
 
@@ -135,7 +137,7 @@ class Embedding:
 
 ### 4.2.3 시그모이드 함수와 교차 엔트로피 오차
 
-`이진 분류`를 신경망으로 해결할려면 `시그모이드 함수`를 적용해 확률로 변환하고, `교차 엔트로피 오차`를 손실 함수로 사용한다.
+✅`이진 분류`를 신경망으로 해결할려면 `시그모이드 함수`를 적용해 확률로 변환하고, `교차 엔트로피 오차`를 손실 함수로 사용한다.
 
 > 시그모이드 공식과 계층, 그래프
 
@@ -157,15 +159,17 @@ class Embedding:
 
 위 그림에서 주목할 것은 `역전파의 y-t`이다.
 
-만약, 정답 레이블`t`이 1이라면, 확률`y`가 1에 가까워질수록 오차가 줄어든다는 뜻이다.
-
-반대로 확률`y`가 1로부터 멀어지면 오차가 커진다.
+✅만약, 정답 레이블`t`이 1이라면, 확률`y`가 1에 가까워질수록 오차가 줄어든다는 뜻이고, 반대로 확률`y`가 1로부터 멀어지면 오차가 커진다.
 
 오차가 `작다면 작게` 학습하고, `크다면 크게` 학습할 것이다.
 
 ### 4.2.4 다중 분류에서 이진 분류로 구현
 
 > 다중 분류망과 이진 분류망
+>
+> 은닉층 뉴런 h는 Embedding Dot을 거쳐  Sigmoid with Loss 계층을 통과한다.
+
+<img src="assets/4장 word2vec 속도 개선/fig 4-13-1616896986568.png">
 
 ```python
 # https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch04/negative_sampling_layer.py
@@ -198,15 +202,16 @@ class SigmoidWithLoss:
         self.params, self.grads = [], []
         self.loss = None
         self.y = None  # sigmoid의 출력
-        self.t = None  # 정답 데이터
+        self.t = None  # 정답 레이블
 
     def forward(self, x, t):
         self.t = t
         
-        # 시그모이드 함수 결과
+        # 시그모이드 함수 계산
         self.y = 1 / (1 + np.exp(-x))
 		
-        # 크로스 엔트로피 오차
+        # 크로스 엔트로피 오차 계산
+        # 공식 구현
         self.loss = cross_entropy_error(np.c_[1 - self.y, self.y], self.t)
 
         return self.loss
@@ -233,6 +238,7 @@ class EmbeddingDot:
     def forward(self, h, idx):
         # 타겟 단어
         target_W = self.embed.forward(idx)
+        
         # 내적 계산 및 행 합계 게산
         out = np.sum(target_W * h, axis=1)
         
@@ -242,9 +248,10 @@ class EmbeddingDot:
     
 
     def backward(self, dout):
+        # 은닉층, 타겟단어
         h, target_W = self.cache
         dout = dout.reshape(dout.shape[0], 1)
-
+		
         dtarget_W = dout * h
         self.embed.backward(dtarget_W)
         dh = dout * target_W
@@ -260,13 +267,13 @@ class EmbeddingDot:
 
 <img src="assets/4장 word2vec 속도 개선/fig 4-16.png">
 
-위 그림처럼 부정적인 예를 입력했을 때 출력이 `0`에 가깝게 해주는 `가중치`가 필요하다.
+✅위 그림처럼 부정적인 예를 입력했을 때 출력이 `0`에 가깝게 해주는 `가중치`가 필요하다.
 
-✅하지만 모든 부정적인 예를 대상으로 이진 분류를 학습시킬 수는 없다. 이진분류를 사용하는 의미가 사라지기 때문이다.
+하지만 모든 부정적인 예를 대상으로 이진 분류를 학습시킬 수는 없다. 이진분류를 사용하는 의미가 사라지기 때문이다.
 
-그래서 근사적인 해법으로 부정적 예를 몇 개만 선택한다. 이것이 바로 `네거티브 샘플링`기법의 의미이다.
+`네거티브 샘플링` 은 근사적인 해법으로 부정적 예를 몇 개만 선택한다.
 
-✅`네거티브 샘플링`은 긍정적 예에 대한 손실을 구하고, 몇 개의 부정적 예에 대한 손실을 구해서 더한 값을 최종 손실`긍적적 예의 손실 + 부적적 예에 대한 손실 합`로 정한다.
+✅`네거티브 샘플링`은 긍정적 예에 대한 손실을 구하고, 몇 개의 부정적 예에 대한 손실을 구해서 더한 값을 최종 손실`긍적적 예의 손실 + 몇개의 부적적 예에 대한 손실 합`로 정한다.
 
  <img src="assets/4장 word2vec 속도 개선/fig 4-17.png" style="zoom:50%;" >
 
@@ -289,6 +296,8 @@ class EmbeddingDot:
 <img src="assets/4장 word2vec 속도 개선/e 4-4.png">
 
 위 식처럼 0.75 를 제곱하는 이유는 `확률이 낮은 단어`의 확률을 살쩍 높히기 위해서이다.
+
+> 양극화를 낮춘다. 즉, 큰것과 낮은 것의 차이를 좁힌다?
 
  <img src="assets/4장 word2vec 속도 개선/image-20210323224124028.png">
 
@@ -328,16 +337,19 @@ class EmbeddingDot:
 
 
 class UnigramSampler:
+    # 단어 ID 목록, 제곱할 값, 샘플링 개수
     def __init__(self, corpus, power, sample_size):
+        # 샘플링 사이즈
         self.sample_size = sample_size
         self.vocab_size = None
         self.word_p = None
-
-        counts = collections.Counter()
+	
         # 단어 등장 빈도수 계산
+        counts = collections.Counter()
         for word_id in corpus:
             counts[word_id] += 1
-
+		
+        # 단어 개수
         vocab_size = len(counts)
         self.vocab_size = vocab_size
 
@@ -347,7 +359,7 @@ class UnigramSampler:
         for i in range(vocab_size):
             self.word_p[i] = counts[i] 
             
-		
+		# 확률 계산
         self.word_p = np.power(self.word_p, power) # 분자 계산
         self.word_p /= np.sum(self.word_p) # 분모 계산
 	
@@ -378,11 +390,14 @@ class NegativeSamplingLoss:
     def __init__(self, W, corpus, power=0.75, sample_size=5):
         # 샘플링 사이즈
         self.sample_size = sample_size
+        
         # 샘플링
         self.sampler = UnigramSampler(corpus, power, sample_size)
+        
         # 출력함수 및 손실함수 저장 리스트
         # self.loss_layers[0] -> 긍정적 예(타깃)
         self.loss_layers = [SigmoidWithLoss() for _ in range(sample_size + 1)]
+        
         # 임베디드 계층 저장 리스트
         # self.embed_dot_layers[0] -> 긍정적 예(타깃)
         self.embed_dot_layers = [EmbeddingDot(W) for _ in range(sample_size + 1)]
@@ -400,8 +415,10 @@ class NegativeSamplingLoss:
         # 긍정적 예 순전파
         # 임베디드 계층 순전파 -> 점수 출력
         score = self.embed_dot_layers[0].forward(h, target)
+        
         # 긍정적 예 정답 레이블 -> 1
         correct_label = np.ones(batch_size, dtype=np.int32)
+        
         # 손실함수
         loss = self.loss_layers[0].forward(score, correct_label)
 
@@ -409,7 +426,9 @@ class NegativeSamplingLoss:
         # 부정적 예 정답 레이블 -> 0
         negative_label = np.zeros(batch_size, dtype=np.int32)
         for i in range(self.sample_size):
+            # 부적적 예 
             negative_target = negative_sample[:, i]
+            
             # 임베디드 계층 순전파 -> 점수 출력
             score = self.embed_dot_layers[1 + i].forward(h, negative_target)
             loss += self.loss_layers[1 + i].forward(score, negative_label)
@@ -544,11 +563,13 @@ trainer.plot()
 word_vecs = model.word_vecs
 if config.GPU:
     word_vecs = to_cpu(word_vecs)
+    
 params = {}
 params['word_vecs'] = word_vecs.astype(np.float16)
 params['word_to_id'] = word_to_id
 params['id_to_word'] = id_to_word
 pkl_file = 'cbow_params.pkl'  # or 'skipgram_params.pkl'
+
 with open(pkl_file, 'wb') as f:
     pickle.dump(params, f, -1)
 ```
@@ -584,8 +605,15 @@ analogy('king', 'man', 'queen',  word_to_id, id_to_word, word_vecs)
 analogy('take', 'took', 'go',  word_to_id, id_to_word, word_vecs)
 analogy('car', 'cars', 'child',  word_to_id, id_to_word, word_vecs)
 analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)
-
 ```
+
+✅ `word2vec`으로 얻은 단어 분산표현은 비슷한 단어를 모을 뿐 아니라, 복잡한 패턴도 파악할 수 있다.
+
+대표적인 예가 "king - man + woman = queen" 의 유추문제이다.
+
+즉, 분산 표현을 사용하면 유추 문제를 덧셈과 뺄셈으로 풀 수 있다는 뜻이다.
+
+> ✅ vec("king") - vec("man") + vec("woman") = vec(?) 를 풀 수 있다는 뜻이다.
 
 ## 4.4 word2vec 남은 주제
 
@@ -599,9 +627,18 @@ analogy('good', 'better', 'bad',  word_to_id, id_to_word, word_vecs)
 
 단어의 분산 표현은 단어를 고정 길이 벡터로 변환해준다는 장점도 있다.  게다가 문장도 단어의 분산 표현을 사용하여 고정 길이 벡터로 변환할 수 있다.
 
-✅단어나 문장을 고정길이 벡터로 변환할 수 있다는 점은 매우 중요하다. 자연어를 벡터로 변환할 수 있다면 머신러닝 기법을 적용할 수 있기 때문이다.
+✅단어나 문장을 고정길이 벡터로 변환할 수 있다는 점은 매우 중요하다. 자연어를 벡터로 변환할 수 있다면 `머신러닝 기법`을 적용할 수 있기 때문이다.
 
 <img src="assets/4장 word2vec 속도 개선/fig 4-21.png">
 
+
+
 ### 4.4.2 단어 벡터 평가 방법
 
+✅`유사성`과 `유추 문제`를 활용한 평가방법이 일반적이다.
+
+`유사성`평가에서는 사람이 작성한 단어 유사도를 검증 세트를 사용해 평가를 한다.
+
+예를들면, 유사도를 0 ~ 10으로 나누고, "cat"과 "animal" 의 유사도는 8점 "cat"과 "car"의 유사도는 2점과 같은 식이다.
+
+`유추문제`는 "king : queen = man : ?" 와 같은 유추 문제를 출제하고, 그 정답률로 단어 벡터를 평가
