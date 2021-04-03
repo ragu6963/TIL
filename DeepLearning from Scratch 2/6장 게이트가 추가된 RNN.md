@@ -129,3 +129,183 @@ print('after:', dW1.flatten())
 
 ## 6.2 기울기 소실과 LSTM
 
+`RNN`에서 `기울기 소실`을 해결하기 위해 등장 한것이 `게이트가 추가된 RNN`이다.
+
+### 6.2.1 LSTM의 인터페이스
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-11.png">
+
+✅`LSTM` 계층에는 `c`라는 새로운 경로가 생겼다. c 를 `기억셀 or 셀`이라하고, LSTM 전용의 기억 메커니즘이다.
+
+`기억 셀`의 특징은 데이터를 자기 자신으로만 주고받는다는 것이다.
+
+즉, LSTM 계층내에서 완결되고, 다른 계층으로는 출력하지 않는다.
+
+### 6.2.2 LSTM 계층 조립하기
+
+✅기억 셀 c~t~ 에는 과거부터 t까지의 필요한 모든 저장돼 있고, 이 정보를 바탕으로 외부 계층에 h~t~를 출력한다.
+
+이때 h~t~는 기억 셀의 값을 tanh 함수로 변환한 값이다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-12.png">
+
+위 그림에서 기억셀 c~t~는 입력 (c~t-1~,h~t-1~,x~t~) 로 부터 구할 수 있고, 핵심은 c~t~를 이용해서 은닉 상태 h~t~ 를 계산한다는 것이다.
+
+> 게이트의 역할 : 데이터 흐름을 제어한다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-13.png">
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-14.png">
+
+✅ 중요한 것은 `게이트의 여는 정도`도 데이터로 부터 학습한다는 것이다.
+
+
+
+### 6.2.3 output 게이트
+
+h~t~ = tanh(c~t~) 인데, 이때, tanh(c~t~)에 **`게이트`**를 적용한다는 것은 
+각 원소에 대해**`다음 시각의 은닉 상태에 얼마나 중요한가`**를 조정한다는 뜻이다.
+
+이때, 이 게이트에 대해 다음 은닉 상태의 출력을 담당하는 게이트 이므로 **`ouput 게이트`** 라고 한다.
+
+---
+
+output 게이트의 열림 상태는 입력 x~t~와 이전 은닉 상태h~t-1~로 부터 구한다.
+
+> **O** : output 게이트, **σ()** : 시그모이드 함수, x~t~ : 입력, h~t-1~ : 이전 은닉상태, W : 가중치, b : 편향
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-1.png">
+
+이 **O**와 **tanh(c~t~)** 의 원소별 곱을 h~t~로 출력한다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-15.png">
+
+✅ 위 그림처럼 output 게이트에서 수행하는 계산을 **σ**로 표기하고, 출력을 **O** 라고하면 **h~t~**는 **tanh(c~t~)**의 곱으로 계산된다. 여기서 말하는 곱은 원소별 곱이며, 이것을 **아다마르 곱**이라고도 한다.
+
+아다마르 곱은 기호로 **Θ** 나타타낸다.
+
+<img src='assets/6장 게이트가 추가된 RNN/e 6-2.png'>
+
+### 6.2.4 forget 게이트
+
+✅ 기억 셀을 기억만 하는 것이 아니라 불필요한 기억을 잊게 할 수도 있다.
+
+c~t-1~의 기억 중에서 한 기억을 잊게 해주는 게이트를 **forget 게이트**라고 한다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-16.png">
+
+> forget 게이트의 수식
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-3.png">
+
+forget 게이트의 출력 **f**와 이전 기억 셀 **c~t-1~**을 원소별로 곱해서 기억셀 **c~t~**를 구한다.
+
+즉 **c~t~ = f Θ c~t-1~**이다.
+
+### 6.2.5 새로운 기억 셀
+
+✅ 새로 기억해야할 정보를 기억 셀에 추가하기 위한 게이트가 필요하다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-17.png">
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-4.png">
+
+ouput 게이트와 forget 게이트와 다른점은 시그모이드 함수가 아닌 **tanh 함수**를 사용했다는 점이다.
+
+#### **c~t~ = f Θ c~t-1~ + g **
+
+### 6.2.6 input 게이트
+
+✅**input 게이트**는 g의 각 원소가 새로 추가되는 정보로써의 가치의 크기를 판단한다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-18.png">
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-5.png">
+
+#### **c~t~ = f Θ c~t-1~ + g Θ i **
+
+### 6.2.7 LSTM의 기울기 흐름
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-19.png">
+
+기억 셀의 역전파에는 **+, x** 만 존재한다.
+
+**+**는 값을 그대로 전달하기 때문에 기울기의 변화가 없다.
+
+✅ **x**는 아다마르 곱(원소별 곱)을 계산하기 때문에 매 시각 다른 게이트 값을 이용해서 곱을 계산하기 때문에 곱셈의 효과가 누적 되지 않아 기울기 소실이 발생하지 않는다.
+
+**x** 노드는 forget 게이트가 제어하는데
+
+**`잊어야 한다`**고 판단한 기억 셀의 원소에 대해서는 기울기가 작아지고,
+
+**`잊어서는 안 된다`**고 판단한 원소에 대해서는 기울기가 약화되지 않고 과거로 전해진다.
+
+## 6.3 LSTM 구현
+
+> LSTM의 계산 수식
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-6.png">
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-7.png">
+
+<img src="assets/6장 게이트가 추가된 RNN/e 6-8.png">
+
+위 식중 각 게이트의 계산 **`f, g, i, o`**를 하나의 식으로 정리할 수 있다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-20.png">
+
+위 그림처럼 4개의 가중치와 편향을 하나로 모아서 한 번에 끝낼 수 있다.
+
+✅ 행렬 라이브러리는 큰 행렬을 한번에 계산할 때 효율적이기 때문에 네 번 계산하는 것보다 한 번 계산하는게 더 빠르다.
+
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-21.png">
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/common/time_layers.py
+
+class LSTM:
+    def __init__(self, Wx, Wh, b):
+        '''
+        Parameters
+        ----------
+        Wx: 입력 x에 대한 4개분의 가중치
+        Wh: 은닉 상태 h에 대한 4개분의 가중치
+        b: 4개분의 편향
+        '''
+        self.params = [Wx, Wh, b]
+        self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
+        
+        # 순전파 중간 결과 보관 변수
+        self.cache = None
+        
+    
+    # 입력, 이전 은닉상태, 이전 기억 셀
+	def forward(self, x, h_prev, c_prev):
+        Wx, Wh, b = self.params
+        # 미니배치 수, 은닉상태와 기억셀의 차원 수
+        N, H = h_prev.shape
+        
+        
+		# affine 계층 계산 결과(4회분)
+        A = np.dot(x, Wx) + np.dot(h_prev, Wh) + b
+	
+    	# 각 게이트 계산 슬라이스
+        f = A[:, :H]
+        g = A[:, H:2*H]
+        i = A[:, 2*H:3*H]
+        o = A[:, 3*H:]
+
+        # 각 게이트 출력
+        f = sigmoid(f)
+        g = np.tanh(g)
+        i = sigmoid(i)
+        o = sigmoid(o)
+		
+        # 다음 기억셀과 다음 은닉상태
+        c_next = f * c_prev + g * i
+        h_next = o * np.tanh(c_next)
+
+        self.cache = (x, h_prev, c_prev, i, f, g, o, c_next)
+        return h_next, c_next
+```
+
