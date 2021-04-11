@@ -10,6 +10,14 @@
 
 ### 6.1.1 RNN 복습
 
+✅RNN 계층은 시계열 데이터 **x**를 입력하면 **은닉 상태 h**를 출력한다.
+
+그런데 RNN은 **장기 기억**에 취약하다는 문제가 있다.
+
+<img src='assets/6장 게이트가 추가된 RNN/fig 6-1.png'>
+
+<img src='assets/6장 게이트가 추가된 RNN/fig 6-2.png'>
+
 ### 6.1.2 기울기 소실 또는 기울기 폭발
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-3.png">
@@ -26,13 +34,13 @@
 
 ### 6.1.3 기울기 소실과 기울기 폭발의 원인
 
- <img src="assets/6장 게이트가 추가된 RNN/fig 6-5.png">
+✅ 상류에서 내려온 기울기는 `tanh`,`+`,`MatMul` 연산을 통과하는데 `tanh`와 `MatMul`이 기울기를 변화시킨다.<img src="assets/6장 게이트가 추가된 RNN/fig 6-5.png">
 
-상류에서 내려온 기울기는 `tanh`,`+`,`MatMul` 연산을 통과하는데 `tanh`와 `MatMul`이 기울기를 변화시킨다.
+
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-6.png">
 
-✅ `tanh`의 점선 그래프를 보면  0에서 가까울수록 커지고, 멀어질수록 작아진다. 
+✅ `tanh`의 점선 그래프를 보면  0에서 가까울수록 커지고, 멀어질수록 작아진다. `최댓값이 1 최솟값이 0`
 
 그런데 최댓값이 1.0 이기 때문에 기울기는 `tanh`를 통과할 때 마다 작아질 수 밖에 없다.
 
@@ -80,9 +88,11 @@ plt.ylabel('노름(norm)')
 plt.show()
 ```
 
-<img src="assets/6장 게이트가 추가된 RNN/fig 6-8.png">
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-8.png" style="zoom:50%;" >
 
-<img src="assets/6장 게이트가 추가된 RNN/fig 6-9.png">
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-9.png" style="zoom:50%;" >
+
+이런 **지수적인 변화**가 일어나는 이유는 행렬 Wh를 T번 곱했기 때문이다.
 
 ### 6.1.4 기울기 폭발 대책
 
@@ -94,7 +104,7 @@ plt.show()
 
 ✅만약 기울기의 L2 노름이 임계값`문턱값`을 초과하면 수정 수식으로 기울기을 수정한다.
 
->여기서 g^^^ 는 모든 기울기를 하나로 모은것이다. 즉 2개의 가중치 W1 W2가 있다면 기울기 dW1 dW2를 결합한 것을 g^^^ 로 한다.
+>여기서 **g^^^** 는 모든 기울기를 하나로 모은것이다. 즉 2개의 가중치 W1 W2가 있다면 기울기 dW1 dW2를 결합한 것을 **g^^^** 로 한다.
 
 ```python
 # https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch06/clip_grads.py
@@ -129,7 +139,7 @@ print('after:', dW1.flatten())
 
 ## 6.2 기울기 소실과 LSTM
 
-`RNN`에서 `기울기 소실`을 해결하기 위해 등장 한것이 `게이트가 추가된 RNN`이다.
+`RNN`에서 `기울기 소실`을 해결하기 위해 등장한것이 **`게이트가 추가된 RNN`**이다.
 
 ### 6.2.1 LSTM의 인터페이스
 
@@ -143,7 +153,7 @@ print('after:', dW1.flatten())
 
 ### 6.2.2 LSTM 계층 조립하기
 
-✅기억 셀 c~t~ 에는 과거부터 t까지의 필요한 모든 저장돼 있고, 이 정보를 바탕으로 외부 계층에 h~t~를 출력한다.
+✅**기억 셀 c~t~** 에는 과거부터 t까지의 필요한 모든 저장돼 있고, 이 정보를 바탕으로 외부 계층에 h~t~를 출력한다.
 
 이때 h~t~는 기억 셀의 값을 tanh 함수로 변환한 값이다.
 
@@ -151,15 +161,13 @@ print('after:', dW1.flatten())
 
 위 그림에서 기억셀 c~t~는 입력 (c~t-1~,h~t-1~,x~t~) 로 부터 구할 수 있고, 핵심은 c~t~를 이용해서 은닉 상태 h~t~ 를 계산한다는 것이다.
 
-> 게이트의 역할 : 데이터 흐름을 제어한다.
+---
+
+✅게이트의 역할 : **데이터 흐름을 제어**하고, **게이트의 여는 정도**도 학습한다.
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-13.png">
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-14.png">
-
-✅ 중요한 것은 `게이트의 여는 정도`도 데이터로 부터 학습한다는 것이다.
-
-
 
 ### 6.2.3 output 게이트
 
@@ -180,7 +188,7 @@ output 게이트의 열림 상태는 입력 x~t~와 이전 은닉 상태h~t-1~�
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-15.png">
 
-✅ 위 그림처럼 output 게이트에서 수행하는 계산을 **σ**로 표기하고, 출력을 **O** 라고하면 **h~t~**는 **tanh(c~t~)**의 곱으로 계산된다. 여기서 말하는 곱은 원소별 곱이며, 이것을 **아다마르 곱**이라고도 한다.
+✅ 그림처럼 output 게이트에서 수행하는 계산을 **σ**로 표기하고, 출력을 **O** 라고하면 **h~t~**는 **tanh(c~t~)**의 곱으로 계산된다. 여기서 말하는 곱은 원소별 곱이며, 이것을 **`아다마르 곱`**이라고도 한다.
 
 아다마르 곱은 기호로 **Θ** 나타타낸다.
 
@@ -188,7 +196,7 @@ output 게이트의 열림 상태는 입력 x~t~와 이전 은닉 상태h~t-1~�
 
 ### 6.2.4 forget 게이트
 
-✅ 기억 셀을 기억만 하는 것이 아니라 불필요한 기억을 잊게 할 수도 있다.
+✅ **불필요한 기억을 잊기** 위한게이트
 
 c~t-1~의 기억 중에서 한 기억을 잊게 해주는 게이트를 **forget 게이트**라고 한다.
 
@@ -204,7 +212,7 @@ forget 게이트의 출력 **f**와 이전 기억 셀 **c~t-1~**을 원소별로
 
 ### 6.2.5 새로운 기억 셀
 
-✅ 새로 기억해야할 정보를 기억 셀에 추가하기 위한 게이트가 필요하다.
+✅ **새로 기억해야할 정보**를 기억 셀에 추가하기 위한 게이트
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-17.png">
 
@@ -216,7 +224,7 @@ ouput 게이트와 forget 게이트와 다른점은 시그모이드 함수가 �
 
 ### 6.2.6 input 게이트
 
-✅**input 게이트**는 g의 각 원소가 새로 추가되는 정보로써의 가치의 크기를 판단한다.
+✅ g의 각 원소가 새로 추가되는 정보로써의 **가치의 크기를 판단**하는 게이트
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-18.png">
 
@@ -232,7 +240,7 @@ ouput 게이트와 forget 게이트와 다른점은 시그모이드 함수가 �
 
 **+**는 값을 그대로 전달하기 때문에 기울기의 변화가 없다.
 
-✅ **x**는 아다마르 곱(원소별 곱)을 계산하기 때문에 매 시각 다른 게이트 값을 이용해서 곱을 계산하기 때문에 곱셈의 효과가 누적 되지 않아 기울기 소실이 발생하지 않는다.
+✅ **x**는 ~~아다마르 곱(원소별 곱)을 계산하기 때문에~~ **`매 시각 다른 게이트 값을 이용`**해서 곱을 계산하기 때문에 곱셈의 효과가 누적 되지 않아 기울기 소실(기울기 폭발)이 발생하지 않는다.
 
 **x** 노드는 forget 게이트가 제어하는데
 
@@ -307,6 +315,217 @@ class LSTM:
 
         self.cache = (x, h_prev, c_prev, i, f, g, o, c_next)
         return h_next, c_next
+    
+    
+    def backward(self, dh_next, dc_next):
+        Wx, Wh, b = self.params
+        # 저장된 값 불러오기
+        x, h_prev, c_prev, i, f, g, o, c_next = self.cache
+
+        tanh_c_next = np.tanh(c_next)
+
+        ds = dc_next + (dh_next * o) * (1 - tanh_c_next ** 2)
+
+        dc_prev = ds * f
+
+        di = ds * g
+        df = ds * c_prev
+        do = dh_next * tanh_c_next
+        dg = ds * i
+
+        di *= i * (1 - i)
+        df *= f * (1 - f)
+        do *= o * (1 - o)
+        dg *= (1 - g ** 2)
+		
+        # 4개의 기울기를 연결해서 하나의 행렬로 만들기 위한 메서드 hstack
+        # 주어진 배열들을 가로로 연결한다.
+        dA = np.hstack((df, dg, di, do))
+
+        dWh = np.dot(h_prev.T, dA)
+        dWx = np.dot(x.T, dA)
+        db = dA.sum(axis=0)
+
+        self.grads[0][...] = dWx
+        self.grads[1][...] = dWh
+        self.grads[2][...] = db
+
+        dx = np.dot(dA, Wx.T)
+        dh_prev = np.dot(dA, Wh.T)
+
+        return dx, dh_prev, dc_prev
+```
+
+### 6.3.1  Time LSTM 구현
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/common/time_layers.py
+class TimeLSTM:
+    def __init__(self, Wx, Wh, b, stateful=False):
+        self.params = [Wx, Wh, b]
+        self.grads = [np.zeros_like(Wx), np.zeros_like(Wh), np.zeros_like(b)]
+        self.layers = None
+
+        self.h, self.c = None, None
+        self.dh = None
+        self.stateful = stateful
+
+    def forward(self, xs):
+        Wx, Wh, b = self.params
+        N, T, D = xs.shape
+        H = Wh.shape[0]
+
+        self.layers = []
+        hs = np.empty((N, T, H), dtype='f')
+
+        if not self.stateful or self.h is None:
+            self.h = np.zeros((N, H), dtype='f')
+        if not self.stateful or self.c is None:
+            self.c = np.zeros((N, H), dtype='f')
+
+        for t in range(T):
+            layer = LSTM(*self.params)
+            self.h, self.c = layer.forward(xs[:, t, :], self.h, self.c)
+            hs[:, t, :] = self.h
+
+            self.layers.append(layer)
+
+        return hs
+
+    def backward(self, dhs):
+        Wx, Wh, b = self.params
+        N, T, H = dhs.shape
+        D = Wx.shape[0]
+
+        dxs = np.empty((N, T, D), dtype='f')
+        dh, dc = 0, 0
+
+        grads = [0, 0, 0]
+        for t in reversed(range(T)):
+            layer = self.layers[t]
+            dx, dh, dc = layer.backward(dhs[:, t, :] + dh, dc)
+            dxs[:, t, :] = dx
+            for i, grad in enumerate(layer.grads):
+                grads[i] += grad
+
+        for i, grad in enumerate(grads):
+            self.grads[i][...] = grad
+        self.dh = dh
+        return dxs
+
+    def set_state(self, h, c=None):
+        self.h, self.c = h, c
+
+    def reset_state(self):
+        self.h, self.c = None, None
+
+```
+
+## 6.4 LSTM을 사용한 언어모델
+
+<img src='assets/6장 게이트가 추가된 RNN/fig 6-26.png'>
+
+```python
+import sys
+sys.path.append('..')
+from common.time_layers import *
+from common.base_model import BaseModel
+
+
+class Rnnlm(BaseModel):
+    def __init__(self, vocab_size=10000, wordvec_size=100, hidden_size=100):
+        V, D, H = vocab_size, wordvec_size, hidden_size
+        rn = np.random.randn
+
+        # 가중치 초기화
+        embed_W = (rn(V, D) / 100).astype('f')
+        lstm_Wx = (rn(D, 4 * H) / np.sqrt(D)).astype('f')
+        lstm_Wh = (rn(H, 4 * H) / np.sqrt(H)).astype('f')
+        lstm_b = np.zeros(4 * H).astype('f')
+        affine_W = (rn(H, V) / np.sqrt(H)).astype('f')
+        affine_b = np.zeros(V).astype('f')
+
+        # 계층 생성
+        # Embedding -> LSTM -> Affine
+        self.layers = [
+            TimeEmbedding(embed_W),
+            TimeLSTM(lstm_Wx, lstm_Wh, lstm_b, stateful=True),
+            TimeAffine(affine_W, affine_b)
+        ]
+        # 손실함수
+        self.loss_layer = TimeSoftmaxWithLoss()
+        self.lstm_layer = self.layers[1]
+
+        # 모든 가중치와 기울기를 리스트에 모은다.
+        self.params, self.grads = [], []
+        for layer in self.layers:
+            self.params += layer.params
+            self.grads += layer.grads
+
+    def predict(self, xs):
+        for layer in self.layers:
+            xs = layer.forward(xs)
+        return xs
+
+    def forward(self, xs, ts):
+        score = self.predict(xs)
+        loss = self.loss_layer.forward(score, ts)
+        return loss
+
+    def backward(self, dout=1):
+        dout = self.loss_layer.backward(dout)
+        for layer in reversed(self.layers):
+            dout = layer.backward(dout)
+        return dout
+
+    def reset_state(self):
+        self.lstm_layer.reset_state()
+```
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch06/train_rnnlm.py
+import sys
+sys.path.append('..')
+from common.optimizer import SGD
+from common.trainer import RnnlmTrainer
+from common.util import eval_perplexity
+from dataset import ptb
+from rnnlm import Rnnlm
+
+
+# 하이퍼파라미터 설정
+batch_size = 20
+wordvec_size = 100
+hidden_size = 100  # RNN의 은닉 상태 벡터의 원소 수
+time_size = 35     # RNN을 펼치는 크기
+lr = 20.0
+max_epoch = 4
+max_grad = 0.25
+
+# 학습 데이터 읽기
+corpus, word_to_id, id_to_word = ptb.load_data('train')
+corpus_test, _, _ = ptb.load_data('test')
+vocab_size = len(word_to_id)
+xs = corpus[:-1]
+ts = corpus[1:]
+
+# 모델 생성
+model = Rnnlm(vocab_size, wordvec_size, hidden_size)
+optimizer = SGD(lr)
+trainer = RnnlmTrainer(model, optimizer)
+
+# 기울기 클리핑을 적용하여 학습
+trainer.fit(xs, ts, max_epoch, batch_size, time_size, max_grad,
+            eval_interval=20)
+trainer.plot(ylim=(0, 500))
+
+# 테스트 데이터로 평가
+model.reset_state()
+ppl_test = eval_perplexity(model, corpus_test)
+print('테스트 퍼플렉서티: ', ppl_test)
+
+# 매개변수 저장
+model.save_params()
 ```
 
 ## 6.5 RNNLM 추가 개선
@@ -329,13 +548,15 @@ class LSTM:
 
 과적합을 억제하기 위한 방법으로는 `데이터 양 늘리기`, `모델의 복잡도 줄이기`, `복잡도에 페널티를 주는 정규화`,`드롭아웃`이 있다.
 
+---
+
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-30.png">
 
 ✅ RNN에 드롭아웃 계층을 넣는 좋은 방법은 **깊이 방향(상하 방향)** 으로 넣는 것이다.
 
-<img src="assets/6장 게이트가 추가된 RNN/fig 6-33.png">
+시간 방향(좌우 방향)으로 드롭아웃을 넣으면 정보가 사라지거나 노이즈가 축적될 수도 있다.
 
-이렇게하면 시간 방향(좌우 방향)에는 영향을 주지않고, 깊이 방향에만 영향을 준다.
+<img src="assets/6장 게이트가 추가된 RNN/fig 6-33.png">
 
 ---
 
@@ -343,11 +564,9 @@ class LSTM:
 
 <img src="assets/6장 게이트가 추가된 RNN/fig 6-34.png">
 
-같은 계층에 속한 드롭아웃들은 **마스크**를 공유한다. 
+같은 계층에 속한 드롭아웃들은 **마스크**를 공유한다.  그림에서는 색이 같은 드롭아웃 계층들은 같은 마스크를 이용한다.
 
-그림에서는 색이 같은 드롭아웃 계층들은 같은 마스크를 이용한다.
-
- 마스크를 공유함으로써 정보를 잃게 되는 방법이 고정되므로, 정보가 지수적으로 손실되는 사태를 피할 수 있다.
+마스크를 공유함으로써 정보를 잃게 되는 방법이 고정되므로, 정보가 지수적으로 손실되는 사태를 피할 수 있다.
 
 ### 6.5.3 가중치 공유
 
@@ -357,5 +576,150 @@ class LSTM:
 
 그림에서는 Embedding 계층과 Affine 계층이 가중치를 공유하고 있다.
 
-두 계층이 가중치를 공유함으로써 학습해야할 가중치 수가 크게 줄어들고, 정확도도 향상된다.
+✅ 두 계층이 가중치를 공유함으로써 학습해야할 **가중치 수가 줄어**들고, **정확도도 향상**된다.
+
+### 6.5.4 개선된 RNNLM 구현
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch06/better_rnnlm.py
+import sys
+sys.path.append('..')
+from common.time_layers import *
+from common.np import *  # import numpy as np
+from common.base_model import BaseModel
+
+
+class BetterRnnlm(BaseModel):
+    '''
+     LSTM 계층을 2개 사용하고 각 층에 드롭아웃을 적용한 모델이다.
+     아래 [1]에서 제안한 모델을 기초로 하였고, [2]와 [3]의 가중치 공유(weight tying)를 적용했다.
+
+     [1] Recurrent Neural Network Regularization (https://arxiv.org/abs/1409.2329)
+     [2] Using the Output Embedding to Improve Language Models (https://arxiv.org/abs/1608.05859)
+     [3] Tying Word Vectors and Word Classifiers (https://arxiv.org/pdf/1611.01462.pdf)
+    '''
+    def __init__(self, vocab_size=10000, wordvec_size=650,
+                 hidden_size=650, dropout_ratio=0.5):
+        V, D, H = vocab_size, wordvec_size, hidden_size
+        rn = np.random.randn
+
+        embed_W = (rn(V, D) / 100).astype('f')
+        lstm_Wx1 = (rn(D, 4 * H) / np.sqrt(D)).astype('f')
+        lstm_Wh1 = (rn(H, 4 * H) / np.sqrt(H)).astype('f')
+        lstm_b1 = np.zeros(4 * H).astype('f')
+        lstm_Wx2 = (rn(H, 4 * H) / np.sqrt(H)).astype('f')
+        lstm_Wh2 = (rn(H, 4 * H) / np.sqrt(H)).astype('f')
+        lstm_b2 = np.zeros(4 * H).astype('f')
+        affine_b = np.zeros(V).astype('f')
+
+        # 계층생성
+        # Embedding -> Dropout -> LSTM -> Dropout -> LSTM -> Dropout -> Affine 
+        self.layers = [
+            TimeEmbedding(embed_W),
+            TimeDropout(dropout_ratio),
+            TimeLSTM(lstm_Wx1, lstm_Wh1, lstm_b1, stateful=True),
+            TimeDropout(dropout_ratio),
+            TimeLSTM(lstm_Wx2, lstm_Wh2, lstm_b2, stateful=True),
+            TimeDropout(dropout_ratio),
+            TimeAffine(embed_W.T, affine_b)  # embed_W.T, 가중치 공유
+        ]
+        # 손실 함수
+        self.loss_layer = TimeSoftmaxWithLoss()
+        self.lstm_layers = [self.layers[2], self.layers[4]]
+        self.drop_layers = [self.layers[1], self.layers[3], self.layers[5]]
+
+        self.params, self.grads = [], []
+        for layer in self.layers:
+            self.params += layer.params
+            self.grads += layer.grads
+
+    def predict(self, xs, train_flg=False):
+        for layer in self.drop_layers:
+            layer.train_flg = train_flg
+
+        for layer in self.layers:
+            xs = layer.forward(xs)
+        return xs
+
+    def forward(self, xs, ts, train_flg=True):
+        score = self.predict(xs, train_flg)
+        loss = self.loss_layer.forward(score, ts)
+        return loss
+
+    def backward(self, dout=1):
+        dout = self.loss_layer.backward(dout)
+        for layer in reversed(self.layers):
+            dout = layer.backward(dout)
+        return dout
+
+    def reset_state(self):
+        for layer in self.lstm_layers:
+            layer.reset_state()
+```
+
+```python
+# https://github.com/WegraLee/deep-learning-from-scratch-2/blob/master/ch06/train_better_rnnlm.py
+import sys
+sys.path.append('..')
+from common import config 
+from common.optimizer import SGD
+from common.trainer import RnnlmTrainer
+from common.util import eval_perplexity, to_gpu
+from dataset import ptb
+from better_rnnlm import BetterRnnlm
+
+
+# 하이퍼파라미터 설정
+batch_size = 20
+wordvec_size = 650
+hidden_size = 650
+time_size = 35
+lr = 20.0
+max_epoch = 40
+max_grad = 0.25
+dropout = 0.5
+
+# 학습 데이터 읽기
+corpus, word_to_id, id_to_word = ptb.load_data('train')
+corpus_val, _, _ = ptb.load_data('val')
+corpus_test, _, _ = ptb.load_data('test')
+
+
+vocab_size = len(word_to_id)
+xs = corpus[:-1]
+ts = corpus[1:]
+
+model = BetterRnnlm(vocab_size, wordvec_size, hidden_size, dropout)
+optimizer = SGD(lr)
+trainer = RnnlmTrainer(model, optimizer)
+
+best_ppl = float('inf')
+for epoch in range(max_epoch):
+    trainer.fit(xs, ts, max_epoch=1, batch_size=batch_size,
+                time_size=time_size, max_grad=max_grad)
+
+    model.reset_state()
+    # 퍼플렉서티 평가
+    ppl = eval_perplexity(model, corpus_val)
+    print('검증 퍼플렉서티: ', ppl)
+	
+    # 새로운 퍼플렉서티가 더 좋다면(낮다면) 파라미터 저장
+    if best_ppl > ppl:
+        best_ppl = ppl
+        model.save_params()
+        
+    # 새로운 퍼플렉서티가 나빠졌다면(높다면) 학습률 낮추기
+    else:
+        lr /= 4.0
+        optimizer.lr = lr
+
+    model.reset_state()
+    print('-' * 50)
+
+
+# 테스트 데이터로 평가
+model.reset_state()
+ppl_test = eval_perplexity(model, corpus_test)
+print('테스트 퍼플렉서티: ', ppl_test)
+```
 
