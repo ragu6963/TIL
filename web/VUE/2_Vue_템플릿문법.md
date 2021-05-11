@@ -99,3 +99,27 @@ Vue 인스턴스 속성에 따라 요소의 `속성명`을 동적으로 변경�
 <form v-on:submit.prevent="onSubmit"> ... </form>
 ```
 
+---
+
+### 약어
+
+> v-bind: 약어는  `:`  이다.
+
+```vue
+<!-- 전체 문법 -->
+<a v-bind:href="url"> ... </a>
+
+<!-- 약어 -->
+<a :href="url"> ... </a>
+```
+
+> v-on: 의 약어는 `@` 이다.
+
+```vue
+<!-- 전체 문법 -->
+<a v-on:click="doSomething"> ... </a>
+
+<!-- 약어 -->
+<a @click="doSomething"> ... </a>
+```
+
