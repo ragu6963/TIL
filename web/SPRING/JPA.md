@@ -576,3 +576,26 @@ public void BaseTimeEntity_등록(){
 }
 ```
 
+---
+
+### List Response
+
+> PostsService.java
+
+```java
+public List<PostsDto.Response> findAll(){
+        return  postsRepository.findAll().stream()
+                .map(PostsDto.Response::new)
+                .collect(Collectors.toList());
+    }
+```
+
+>PostsApiController.java
+
+```java
+@GetMapping("/api/v1/posts")
+public List<PostsDto.Response> findAll(){
+    return postsService.findAll();
+}
+```
+
