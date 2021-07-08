@@ -12,7 +12,7 @@ JSX 사용이 필수는 아니지만 대부분 사용하기 때문에 필수라�
 
 변환 사이트 : https://babeljs.io/repl
 
-![](assets/(3) JSX/image.png)
+<img src="assets/(3) JSX/image.png">
 
 ### JSX 규칙
 

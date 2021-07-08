@@ -210,13 +210,122 @@ rfr.fit(X_train, y_train)
 
 
 
+
 ### 실험해볼것
 
-#### target 정규화
+##### target 정규화
 
-#### 건물마다 나눠서 학습시켜서 측정
+##### 건물마다 나눠서 학습시켜서 측정
 
-#### 강수량 제외하고 학습
+##### 강수량 제외하고 학습
 
-#### 정규화 후 다시 log scaler 
+##### target 로그 변환
+
+
+
+---
+
+### 건물나눠서 예측
+
+> 생각보다 결과가 좋지 못했다. 데이터량이 줄어들어서 성능이 안좋아진게 아닐까?
+
+```python
+train_df_groups = train_df.groupby(train_df.건물번호)
+test_df_groups = test_df.groupby(test_df.건물번호)
+
+submission = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/전력사용량예측/datasets/sample_submission.csv', encoding = 'utf-8')
+submission = submission.astype({"answer" : 'float'})
+start = 0
+for i in range(1,61):
+    # i 번째 건물 그룹 불러오기
+    train = train_df_groups.get_group(i)
+    test = test_df_groups.get_group(i)
+
+    # feature target 분리
+    X_train = train.drop(["전력"],axis=1) 
+    y_train = train["전력"]
+
+    # 정규화
+    scaler = StandardScaler() 
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(test)
+
+    # 학습
+    rfr = RandomForestRegressor(random_state=1)
+    rfr.fit(X_train, y_train)
+
+    # 예측 
+    pred = rfr.predict(X_test)
+    # answer 저장 
+    end = start + len(pred)
+    submission.iloc[start:end]["answer"]= pred 
+    start = end
+```
+
+### 로그 변환
+
+```python
+y_train_log = np.log1p(y_train) 
+y_train_log
+
+rfr = RandomForestRegressor(random_state=1)
+rfr.fit(X_train, y_train_log)
+
+pred = rfr.predict(X_test)
+pred = np.exp(pred)
+```
+
+### LGBM + KFold
+
+```python
+from sklearn.model_selection import KFold
+cross=KFold(n_splits=5, shuffle=True, random_state=42)
+
+folds=[]
+
+for train_idx, valid_idx in cross.split(X_train, y_train_log):
+    folds.append((train_idx, valid_idx))
+    
+from lightgbm import LGBMRegressor
+models={}
+for fold in range(5):
+    print(f'===================={fold+1}=======================')
+    train_idx, valid_idx=folds[fold]
+    train_x=X_train[train_idx]
+    train_y=y_train_log[train_idx]
+    valid_x=X_train[valid_idx]
+    valid_y=y_train_log[valid_idx]
+    
+    model=LGBMRegressor(n_estimators=100)
+    model.fit(X_train, y_train_log, eval_set=[(train_x, train_y), (valid_x, valid_y)], 
+             early_stopping_rounds=30, verbose=100)
+    models[fold]=model
+
+for i in range(5):
+    pred = np.exp(models[i].predict(X_test)) / 5 
+    submission['answer'] += pred
+
+submission
+```
+
+---
+
+seasonal - statsmodels.api
+
+### 군집화
+
+```python
+clustering = {34:0,40:0,42:0,41:0,4:0,10:0,11:0,12:0,
+              35:1,6:1,48:1,27:1,57:1,8:1,25:1,56:1,26:1,55:1,47:1,13:1,53:1,18:1,17:1,7:1,46:1,
+              31:2,33:2,9:2,3:2,1:2,32:2,
+              29:3,38:3,43:3,58:3,15:3,22:3,39:3,54:3,23:3,44:3,45:3,37:3,52:3,2:3,14:3,
+              21:4,19:4,50:4,49:4,20:4,51:4,30:4,36:4,28:4,59:4,5:4,60:4,16:4,24:4,}
+
+def cluster(x):
+    return clustering[x]
+
+train_df['label'] = train_df['number'].apply(lambda x:cluster(x))
+test_df['label'] = test_df['number'].apply(lambda x:cluster(x))
+```
 
