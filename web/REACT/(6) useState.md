@@ -175,3 +175,133 @@ const Counter = () => {
 
 export default Counter;
 ```
+
+### 객체를 이용하여 여러개의 input 관리하기
+일반적으로 `form` 태그 안에는 여러개의 `input` 이 필요하다.
+그런데 각 input 의 상태 관리를 위해 `useState` 를 호출하고, `onChange` 함수를 만들면 코드의 가독성이 떨어질 수 밖에 없다.
+
+다음 코드는 간단한 회원가입 컴포넌트이다.
+3개의 `input` 을 위해 3개의 `useState` 와 `onChange` 를 만들었다.
+```jsx
+const Signup = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordconfirm, setPasswordConfirm] = useState("");
+
+  const onChangeUsername = (e) => {
+    setUsername(e.target.value)
+  }
+
+  const onChangePassword = (e) => {
+    setPassword(e.target.value)
+  }
+
+  const onPasswordConfirm = (e) => {
+    setPasswordConfirm(e.target.value)
+  }
+
+  return (
+    <div>
+      <form>
+        <label htmlFor="username">아이디 : </label>
+        <input id="username" value={username} onChange={onChangeUsername} />
+        <br />
+        <label htmlFor="password">비밀번호 : </label>
+        <input id="password" value={password} onChange={onChangePassword} />
+        <br />
+        <label htmlFor="passwordconfirm">비밀번호 확인 : </label>
+        <input id="passwordconfirm" value={passwordconfirm} onChange={onPasswordConfirm} />
+      </form>
+    </div>
+  )
+}
+```
+
+다음 코드는 state 를 객체로 생성해서 관리하는 코드이다.
+하나의 `useState` 와 `onChange` 로 여러개의 `input` 관리할 수 있다.
+```jsx
+const Signup = () => {
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+    passwordconfirm: '',
+  });
+
+  // 구조분해할당
+  const { username, password, passwordconfirm } = credentials
+
+  const onChange = (e) => {
+    // 이벤트가 발생한 요소의 value 와 name 추출
+    const { value, name } = e.target;
+
+    // 상태 갱신
+    setCredentials({
+      ...credentials, // 스프레드 연산자, 기존 credentials 를 복사
+      [name]: value // name 키를 가진 값을 value 로 갱신
+    });
+  };
+
+
+  return (
+    <div>
+      <form>
+        <label htmlFor="username">아이디 : </label>
+        <input id="username" name="username" value={username} onChange={onChange} />
+        <br />
+        <label htmlFor="password">비밀번호 : </label>
+        <input id="password" name="password" value={password} onChange={onChange} />
+        <br />
+        <label htmlFor="passwordconfirm">비밀번호 확인 : </label>
+        <input id="passwordconfirm" name="passwordconfirm" value={passwordconfirm} onChange={onChange} />
+      </form>
+    </div>
+  )
+}
+```
+
+### immer.js 로 불변성 관리하기
+
+react 에서 배열 혹은 객체 `state` 를 변경할 때에는 직접적으로 값을 수정하면 안된다.
+그래서 위의 코드에서는 `credentials` 객체를 수정할 때 직접적인 수정이 아니라 새로운 객체를 생성해서 값을 변경했다.
+
+```jsx
+const onChange = (e) => { 
+  const { value, name } = e.target;
+ 
+  setCredentials({
+    // 새로운 객체를 생성해서 상태를 변경한다.
+    ...credentials,  
+    [name]: value  
+  });
+};
+```
+
+`immer` 는 이러한 과정을 편하게 할 수 있게 도와준다.
+
+#### immer 설치
+
+`yarn add immer`
+
+#### immer 불러오기
+
+immer 를 사용하기 위해 불러온다. 일반적으로 `produce` 라는 이름으로 불러온다.
+`import produce from 'immer';`
+
+#### 함수형 컴포넌트에서 immer 사용하기
+
+`produce` 함수의 첫번째 피라미터는 수정하고 싶은 배열 혹은 객체 `state`, 두 번째 피라미터는 첫 번째 `state` 를 수정하는 함수이다.
+
+아래 코드에서 `produce` 는 수정한 객체 `credentials` 를 반환하고, `setCredentials` 의해 값이 변경된다.
+```jsx
+const onChange = (e) => {
+  const { value, name } = e.target;
+  
+  setCredentials(
+    // produce 는 새로운 credentials 를 반환하고, setCredentials 에 의해 상태가 변경된다.
+    produce(credentials, draft => {
+      draft[name] = value
+    })
+  ) 
+  
+};
+```
